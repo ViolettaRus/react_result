@@ -1,0 +1,596 @@
+.workspace {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  background: linear-gradient(135deg, #f8fafc 0%, #ffffff 50%, #f1f5f9 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+.workspace::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 200px;
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.05) 0%, rgba(139, 92, 246, 0.05) 100%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.workspace-toolbar {
+  background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+  border-bottom: 2px solid #e2e8f0;
+  padding: 20px 40px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 90px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+  position: relative;
+  z-index: 1;
+  backdrop-filter: blur(10px);
+}
+
+.workspace-info {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1;
+}
+
+.workspace-note-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1e293b;
+  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+
+.workspace-note-date {
+  font-size: 0.9rem;
+  color: #94a3b8;
+  font-weight: 500;
+}
+
+.editing-indicator {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #6366f1;
+  margin-right: 16px;
+  display: flex;
+  align-items: center;
+}
+
+.editing-indicator::before {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #6366f1;
+  margin-right: 8px;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.5;
+    transform: scale(1.2);
+  }
+}
+
+.workspace-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.workspace-actions.editing {
+  margin-left: auto;
+}
+
+.workspace-btn {
+  border-radius: 10px;
+  font-weight: 600;
+  height: 44px;
+  padding: 0 24px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  font-size: 0.95rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.workspace-btn:hover {
+  transform: translateY(-2px);
+}
+
+.workspace-btn-edit {
+  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+  border: none;
+  box-shadow: 0 4px 16px rgba(99, 102, 241, 0.3);
+}
+
+.workspace-btn-edit:hover {
+  box-shadow: 0 6px 24px rgba(99, 102, 241, 0.4);
+  background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+}
+
+.workspace-btn-delete {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  border: none;
+  box-shadow: 0 4px 16px rgba(239, 68, 68, 0.3);
+}
+
+.workspace-btn-delete:hover {
+  box-shadow: 0 6px 24px rgba(239, 68, 68, 0.4);
+  background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+}
+
+.workspace-btn-save {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  border: none;
+  box-shadow: 0 4px 16px rgba(16, 185, 129, 0.3);
+}
+
+.workspace-btn-save:hover {
+  box-shadow: 0 6px 24px rgba(16, 185, 129, 0.4);
+  background: linear-gradient(135deg, #059669 0%, #047857 100%);
+}
+
+.workspace-btn-cancel {
+  border: 2px solid #e2e8f0;
+  background: white;
+  color: #64748b;
+}
+
+.workspace-btn-cancel:hover {
+  border-color: #cbd5e1;
+  background: #f8fafc;
+  color: #475569;
+}
+
+.workspace-content {
+  flex: 1;
+  overflow: hidden;
+  padding: 40px;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  z-index: 1;
+}
+
+.workspace-editor-container {
+  flex: 1;
+  border: 2px solid #e2e8f0;
+  border-radius: 20px;
+  overflow: visible;
+  background: white;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(0, 0, 0, 0.04);
+  display: flex;
+  flex-direction: column;
+  transition: all 0.3s ease;
+  position: relative;
+  z-index: 1;
+}
+
+.workspace-editor-container:hover {
+  box-shadow: 0 12px 48px rgba(99, 102, 241, 0.12), 0 4px 16px rgba(0, 0, 0, 0.08);
+  border-color: rgba(99, 102, 241, 0.3);
+}
+
+.workspace-view {
+  flex: 1;
+  border-radius: 20px;
+  background: white;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(0, 0, 0, 0.04);
+  padding: 48px 56px;
+  overflow-y: auto;
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.workspace-view:hover {
+  box-shadow: 0 12px 48px rgba(99, 102, 241, 0.12), 0 4px 16px rgba(0, 0, 0, 0.08);
+}
+
+.workspace-view::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #6366f1 0%, #8b5cf6 50%, #6366f1 100%);
+  background-size: 200% 100%;
+  animation: shimmer 3s ease-in-out infinite;
+  border-radius: 20px 20px 0 0;
+}
+
+@keyframes shimmer {
+  0%, 100% {
+    background-position: 0% 0%;
+  }
+  50% {
+    background-position: 100% 0%;
+  }
+}
+
+.workspace-content-markdown,
+.workspace-content-html {
+  line-height: 1.9;
+  color: #000000;
+  font-size: 1.05rem;
+}
+
+.workspace-content-markdown p,
+.workspace-content-html p {
+  margin-bottom: 18px;
+  margin-top: 0;
+  color: #000000;
+}
+
+.workspace-content-markdown p:first-of-type,
+.workspace-content-html p:first-of-type {
+  font-size: 1.05rem;
+  font-weight: 400;
+  margin-bottom: 18px;
+  margin-top: 0;
+  line-height: 1.9;
+  color: #000000;
+}
+
+.workspace-content-markdown h1,
+.workspace-content-markdown h2,
+.workspace-content-markdown h3,
+.workspace-content-markdown h4,
+.workspace-content-markdown h5,
+.workspace-content-markdown h6,
+.workspace-content-html h1,
+.workspace-content-html h2,
+.workspace-content-html h3,
+.workspace-content-html h4,
+.workspace-content-html h5,
+.workspace-content-html h6 {
+  margin-top: 28px;
+  margin-bottom: 18px;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.workspace-content-html h1:first-child,
+.workspace-content-html h2:first-child,
+.workspace-content-html h3:first-child {
+  margin-top: 0;
+}
+
+.workspace-content-html h1 {
+  font-size: 2.75rem;
+  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.workspace-content-html h2 {
+  font-size: 2.25rem;
+  color: #334155;
+}
+
+.workspace-content-html h3 {
+  font-size: 1.75rem;
+  color: #475569;
+}
+
+.workspace-content-html ul,
+.workspace-content-html ol {
+  margin-bottom: 18px;
+  padding-left: 32px;
+}
+
+.workspace-content-html ul li,
+.workspace-content-html ol li {
+  margin: 10px 0;
+  line-height: 1.7;
+}
+
+.workspace-content-html ul {
+  list-style-type: none;
+  padding-left: 0;
+}
+
+.workspace-content-html ul li {
+  padding-left: 0;
+}
+
+.workspace-content-html ul li::before {
+  content: '▸';
+  color: inherit;
+  font-weight: 400;
+  display: inline-block;
+  width: 1.2em;
+  margin-right: 12px;
+  font-size: 1.2em;
+}
+
+.workspace-content-html ol {
+  list-style-type: none;
+  padding-left: 0;
+  counter-reset: list-counter;
+}
+
+.workspace-content-html ol li {
+  counter-increment: list-counter;
+  padding-left: 0;
+  position: relative;
+}
+
+.workspace-content-html ol li::before {
+  content: counter(list-counter) '.';
+  color: inherit;
+  font-weight: 400;
+  display: inline-block;
+  width: 1.5em;
+  margin-right: 8px;
+  text-align: right;
+  font-size: 1rem;
+}
+
+.workspace-content-html code {
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(139, 92, 246, 0.1) 100%);
+  padding: 4px 10px;
+  border-radius: 8px;
+  font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+  font-size: 0.9em;
+  color: #6366f1;
+  border: 1px solid rgba(99, 102, 241, 0.2);
+}
+
+.workspace-content-html pre {
+  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+  color: #f1f5f9;
+  padding: 28px;
+  border-radius: 16px;
+  overflow: auto;
+  margin: 28px 0;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.workspace-content-html pre code {
+  background: transparent;
+  padding: 0;
+  color: inherit;
+  border: none;
+}
+
+.workspace-content-html blockquote {
+  border-left: 4px solid #6366f1;
+  padding: 20px 28px;
+  margin: 28px 0;
+  font-style: italic;
+  background: linear-gradient(90deg, rgba(99, 102, 241, 0.05) 0%, transparent 100%);
+  border-radius: 0 12px 12px 0;
+  color: #475569;
+  font-size: 1.1em;
+}
+
+.workspace-content-html a {
+  color: #6366f1;
+  text-decoration: none;
+  border-bottom: 2px solid transparent;
+  transition: all 0.2s ease;
+  font-weight: 500;
+}
+
+.workspace-content-html a:hover {
+  border-bottom-color: #6366f1;
+  color: #4f46e5;
+}
+
+.workspace-content-html strong,
+.workspace-content-html b {
+  font-weight: 700;
+  color: inherit;
+}
+
+.workspace-content-html em,
+.workspace-content-html i {
+  font-style: italic;
+  color: inherit;
+}
+
+.workspace-content-html u {
+  text-decoration: underline;
+  text-decoration-color: currentColor;
+  color: inherit;
+}
+
+.workspace-content-html s,
+.workspace-content-html strike {
+  text-decoration: line-through;
+  text-decoration-color: currentColor;
+  color: inherit;
+}
+
+/* Базовый цвет текста - черный, применяется только если нет inline цвета */
+.workspace-content-html p:not([style*="color"]),
+.workspace-content-html div:not([style*="color"]),
+.workspace-content-html span:not([style*="color"]) {
+  color: #000000;
+}
+
+/* Поддержка inline стилей форматирования */
+.workspace-content-html [style*="font-weight: bold"],
+.workspace-content-html [style*="font-weight:bold"],
+.workspace-content-html [style*="font-weight: 700"],
+.workspace-content-html [style*="font-weight:700"] {
+  font-weight: 700 !important;
+  color: inherit;
+}
+
+.workspace-content-html [style*="font-style: italic"],
+.workspace-content-html [style*="font-style:italic"] {
+  font-style: italic !important;
+  color: inherit;
+}
+
+.workspace-content-html [style*="text-decoration: underline"],
+.workspace-content-html [style*="text-decoration:underline"] {
+  text-decoration: underline !important;
+  text-decoration-color: currentColor !important;
+  color: inherit;
+}
+
+.workspace-content-html [style*="text-decoration: line-through"],
+.workspace-content-html [style*="text-decoration:line-through"] {
+  text-decoration: line-through !important;
+  text-decoration-color: currentColor !important;
+  color: inherit;
+}
+
+/* Поддержка цветного текста */
+.workspace-content-html [style*="color"] {
+  /* Цвет применяется из inline стиля */
+  display: inline;
+}
+
+.workspace-content-html span[style*="color"] {
+  display: inline;
+}
+
+.workspace-content-html span[style*="color"] * {
+  color: inherit;
+}
+
+/* Поддержка подчеркивания и зачеркивания внутри цветных span */
+.workspace-content-html span[style*="color"] u,
+.workspace-content-html span[style*="color"] s,
+.workspace-content-html span[style*="color"] strike {
+  text-decoration-color: currentColor !important;
+  color: inherit;
+}
+
+/* Убеждаемся, что форматирование наследует цвет от родителя */
+.workspace-content-html span[style*="color"] strong,
+.workspace-content-html span[style*="color"] b,
+.workspace-content-html span[style*="color"] em,
+.workspace-content-html span[style*="color"] i {
+  color: inherit;
+}
+
+.workspace-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48px;
+  position: relative;
+  z-index: 1;
+}
+
+.empty-state h3 {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: #64748b;
+  margin: 0 0 16px 0;
+  background: linear-gradient(135deg, #64748b 0%, #94a3b8 100%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.empty-state p {
+  font-size: 1.1rem;
+  color: #94a3b8;
+  margin: 0;
+  font-weight: 500;
+}
+
+/* Кастомный скроллбар для области просмотра */
+.workspace-view::-webkit-scrollbar {
+  width: 12px;
+}
+
+.workspace-view::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 6px;
+}
+
+.workspace-view::-webkit-scrollbar-thumb {
+  background: linear-gradient(135deg, #cbd5e1 0%, #94a3b8 100%);
+  border-radius: 6px;
+  border: 2px solid #f1f5f9;
+}
+
+.workspace-view::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(135deg, #94a3b8 0%, #6366f1 100%);
+}
+
+/* Анимация появления контента */
+.workspace-view {
+  animation: fadeIn 0.4s ease-in;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(15px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Стили для модального окна удаления */
+.delete-modal .ant-modal-header {
+  border-bottom: 2px solid #fee2e2;
+  padding: 20px 24px;
+}
+
+.delete-modal-title {
+  display: flex;
+  align-items: center;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.delete-modal-content {
+  padding: 8px 0;
+}
+
+.delete-modal-content p {
+  font-size: 1rem;
+  color: #475569;
+  margin-bottom: 12px;
+  line-height: 1.6;
+}
+
+.delete-warning {
+  color: #ef4444 !important;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.delete-modal .ant-modal-footer {
+  border-top: 2px solid #fee2e2;
+  padding: 16px 24px;
+}
+
+.delete-modal .ant-btn {
+  height: 44px;
+  border-radius: 10px;
+  font-weight: 600;
+  padding: 0 24px;
+}

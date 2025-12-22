@@ -1,0 +1,45 @@
+.toggle-btn-group {
+  display: inline-flex;
+  gap: 4px;
+}
+
+.toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #e2e8f0;
+  background: white;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: all 0.2s ease-in-out;
+  padding: 8px;
+  color: #64748b;
+}
+
+.toggle-btn-small {
+  padding: 6px;
+}
+
+.toggle-btn-medium {
+  padding: 8px;
+}
+
+.toggle-btn:hover:not(:disabled) {
+  background: rgba(99, 102, 241, 0.06);
+}
+
+.toggle-btn-selected {
+  background: rgba(99, 102, 241, 0.12);
+  color: #6366f1;
+  border-color: #6366f1;
+}
+
+.toggle-btn-selected:hover:not(:disabled) {
+  background: rgba(99, 102, 241, 0.18);
+}
+
+.toggle-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
