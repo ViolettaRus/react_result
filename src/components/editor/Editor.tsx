@@ -19,6 +19,15 @@ interface EditorProps {
   onChange: (content: string) => void;
 }
 
+const colors = [
+  { name: 'Черный', value: '#000000' },
+  { name: 'Красный', value: '#dc2626' },
+  { name: 'Синий', value: '#2563eb' },
+  { name: 'Зеленый', value: '#16a34a' },
+  { name: 'Оранжевый', value: '#ea580c' },
+  { name: 'Фиолетовый', value: '#9333ea' },
+];
+
 const Editor: React.FC<EditorProps> = ({ content, onChange }) => {
   const editorRef = useRef<HTMLDivElement>(null);
   const [isBold, setIsBold] = useState(false);
@@ -32,56 +41,41 @@ const Editor: React.FC<EditorProps> = ({ content, onChange }) => {
   const isUpdatingRef = useRef(false);
   const lastSelectionRef = useRef<Range | null>(null);
 
-  const colors = [
-    { name: 'Черный', value: '#000000' },
-    { name: 'Красный', value: '#dc2626' },
-    { name: 'Синий', value: '#2563eb' },
-    { name: 'Зеленый', value: '#16a34a' },
-    { name: 'Оранжевый', value: '#ea580c' },
-    { name: 'Фиолетовый', value: '#9333ea' },
-  ];
-
-  // Сохранение выделения
   const saveSelection = () => {
     const selection = window.getSelection();
     if (selection && selection.rangeCount > 0 && editorRef.current) {
       const range = selection.getRangeAt(0);
-      // Проверяем, что выделение находится внутри редактора
       if (editorRef.current.contains(range.commonAncestorContainer)) {
         lastSelectionRef.current = range.cloneRange();
       }
     }
   };
 
-  // Восстановление выделения
   const restoreSelection = () => {
-    if (lastSelectionRef.current && editorRef.current) {
-      const selection = window.getSelection();
-      if (selection) {
-        try {
-          // Проверяем, что выделение все еще валидно
-          if (editorRef.current.contains(lastSelectionRef.current.commonAncestorContainer)) {
-            selection.removeAllRanges();
-            selection.addRange(lastSelectionRef.current);
-          } else {
-            // Если выделение невалидно, создаем новое в конце
-            const range = document.createRange();
-            range.selectNodeContents(editorRef.current);
-            range.collapse(false);
-            selection.removeAllRanges();
-            selection.addRange(range);
-            lastSelectionRef.current = range;
-          }
-        } catch (e) {
-          // Если не удалось восстановить, создаем новое выделение
-          const range = document.createRange();
-          range.selectNodeContents(editorRef.current);
-          range.collapse(false);
-          selection.removeAllRanges();
-          selection.addRange(range);
-          lastSelectionRef.current = range;
-        }
+    if (!lastSelectionRef.current || !editorRef.current) return;
+    
+    const selection = window.getSelection();
+    if (!selection) return;
+    
+    try {
+      if (editorRef.current.contains(lastSelectionRef.current.commonAncestorContainer)) {
+        selection.removeAllRanges();
+        selection.addRange(lastSelectionRef.current);
+      } else {
+        const range = document.createRange();
+        range.selectNodeContents(editorRef.current);
+        range.collapse(false);
+        selection.removeAllRanges();
+        selection.addRange(range);
+        lastSelectionRef.current = range;
       }
+    } catch (e) {
+      const range = document.createRange();
+      range.selectNodeContents(editorRef.current);
+      range.collapse(false);
+      selection.removeAllRanges();
+      selection.addRange(range);
+      lastSelectionRef.current = range;
     }
   };
 
@@ -91,7 +85,6 @@ const Editor: React.FC<EditorProps> = ({ content, onChange }) => {
       if (content !== currentContent) {
         saveSelection();
         isUpdatingRef.current = true;
-        // Убеждаемся, что при инициализации используется обычный параграф без форматирования
         const initialContent = content || '<p style="font-weight: normal; font-style: normal; text-decoration: none;"></p>';
         editorRef.current.innerHTML = initialContent;
         
@@ -107,17 +100,14 @@ const Editor: React.FC<EditorProps> = ({ content, onChange }) => {
   const execCommand = (command: string, value?: string) => {
     if (!editorRef.current) return;
     
-    // Фокусируемся на редакторе
     editorRef.current.focus();
     
-    // Сохраняем текущее выделение перед выполнением команды
     const selection = window.getSelection();
     let range: Range | null = null;
     
     if (selection && selection.rangeCount > 0) {
       range = selection.getRangeAt(0).cloneRange();
     } else {
-      // Если нет выделения, создаем выделение в конце
       range = document.createRange();
       if (editorRef.current.lastChild) {
         range.setStartAfter(editorRef.current.lastChild);
@@ -128,13 +118,11 @@ const Editor: React.FC<EditorProps> = ({ content, onChange }) => {
       }
     }
     
-    // Восстанавливаем выделение
     if (range && selection) {
       try {
         selection.removeAllRanges();
         selection.addRange(range);
       } catch (e) {
-        // Если не удалось, создаем новое выделение
         const newRange = document.createRange();
         if (editorRef.current.firstChild) {
           newRange.setStart(editorRef.current, 0);
@@ -149,34 +137,26 @@ const Editor: React.FC<EditorProps> = ({ content, onChange }) => {
       }
     }
     
-    // Выполняем команду
     let success = false;
     try {
-      // Пробуем без styleWithCSS сначала (для лучшей совместимости)
       success = document.execCommand(command, false, value);
       
-      // Если не сработало, пробуем с styleWithCSS
       if (!success) {
         try {
           document.execCommand('styleWithCSS', false, 'true');
           success = document.execCommand(command, false, value);
         } catch (e) {
-          // Игнорируем ошибку
+          // Ignore error
         }
       }
     } catch (e) {
       console.error('execCommand failed:', e);
     }
     
-    // Всегда обновляем контент, даже если команда не выполнилась
-    // Это нужно для сохранения форматирования
     saveSelection();
     
-    // Принудительно обновляем контент для отображения форматирования
     setTimeout(() => {
-      // Принудительно обновляем HTML для сохранения форматирования
       if (editorRef.current && success) {
-        // Триггерим событие input для сохранения изменений
         const inputEvent = new Event('input', { bubbles: true, cancelable: true });
         editorRef.current.dispatchEvent(inputEvent);
       }
@@ -185,7 +165,6 @@ const Editor: React.FC<EditorProps> = ({ content, onChange }) => {
       updateContent();
       if (editorRef.current) {
         editorRef.current.focus();
-        // Восстанавливаем выделение после обновления
         restoreSelection();
       }
     }, 10);
@@ -213,7 +192,6 @@ const Editor: React.FC<EditorProps> = ({ content, onChange }) => {
       setIsBulletList(document.queryCommandState('insertUnorderedList'));
       setIsNumberedList(document.queryCommandState('insertOrderedList'));
         
-        // Определяем выравнивание
         if (document.queryCommandState('justifyLeft')) {
           setAlign('left');
         } else if (document.queryCommandState('justifyCenter')) {
@@ -222,26 +200,21 @@ const Editor: React.FC<EditorProps> = ({ content, onChange }) => {
           setAlign('right');
         }
       } catch (e) {
-        // Игнорируем ошибки
+        // Ignore errors
       }
     }
   };
 
   const handleInput = () => {
-    // Сохраняем выделение перед обновлением
     saveSelection();
     
-    // Принудительно обновляем форматирование в DOM
     if (editorRef.current) {
-      // Убеждаемся, что форматирование сохраняется
       const html = editorRef.current.innerHTML;
-      // Если HTML изменился, обновляем контент
       if (html !== content) {
         updateContent();
       }
     }
     
-    // Обновляем контент и состояние
     requestAnimationFrame(() => {
       updateContent();
       updateState();
@@ -250,7 +223,6 @@ const Editor: React.FC<EditorProps> = ({ content, onChange }) => {
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    // Обработка горячих клавиш
     if (e.ctrlKey || e.metaKey) {
       if (e.key === 'b') {
         e.preventDefault();
@@ -269,7 +241,6 @@ const Editor: React.FC<EditorProps> = ({ content, onChange }) => {
       }
     }
     
-    // Сохраняем выделение при нажатии Enter
     if (e.key === 'Enter') {
       saveSelection();
       requestAnimationFrame(() => {
@@ -286,7 +257,6 @@ const Editor: React.FC<EditorProps> = ({ content, onChange }) => {
   };
 
   const handleMouseUp = () => {
-    // Небольшая задержка для корректного сохранения выделения
     setTimeout(() => {
       updateState();
       saveSelection();
@@ -294,7 +264,6 @@ const Editor: React.FC<EditorProps> = ({ content, onChange }) => {
   };
 
   const handleSelectionChange = () => {
-    // Обновляем состояние при изменении выделения
     if (editorRef.current && document.activeElement === editorRef.current) {
       updateState();
       saveSelection();
@@ -311,13 +280,9 @@ const Editor: React.FC<EditorProps> = ({ content, onChange }) => {
   const handleColorChange = (color: string) => {
     if (!editorRef.current) return;
     
-    // Восстанавливаем сохраненное выделение
     restoreSelection();
-    
-    // Фокусируемся на редакторе
     editorRef.current.focus();
     
-    // Небольшая задержка для восстановления фокуса
     setTimeout(() => {
       const selection = window.getSelection();
       let range: Range | null = null;
@@ -325,13 +290,11 @@ const Editor: React.FC<EditorProps> = ({ content, onChange }) => {
       if (selection && selection.rangeCount > 0) {
         range = selection.getRangeAt(0);
       } else if (lastSelectionRef.current) {
-        // Используем сохраненное выделение
         range = lastSelectionRef.current.cloneRange();
         try {
           selection?.removeAllRanges();
           selection?.addRange(range);
         } catch (e) {
-          // Если не удалось восстановить, создаем новое в конце
           const currentEditor = editorRef.current;
           if (currentEditor) {
             range = document.createRange();
@@ -342,7 +305,6 @@ const Editor: React.FC<EditorProps> = ({ content, onChange }) => {
           }
         }
       } else {
-        // Если нет выделения, создаем выделение в конце
         const currentEditor = editorRef.current;
         if (currentEditor) {
           range = document.createRange();
@@ -355,15 +317,12 @@ const Editor: React.FC<EditorProps> = ({ content, onChange }) => {
       
       if (!range) return;
       
-      // Применяем цвет через span (более надежный метод)
       let success = false;
       
       if (range) {
         try {
           if (!range.collapsed) {
-            // Есть выделение - оборачиваем в span
             const span = document.createElement('span');
-            // Применяем цвет через inline стиль
             span.style.color = color;
             span.style.setProperty('color', color, 'important');
             
@@ -371,21 +330,16 @@ const Editor: React.FC<EditorProps> = ({ content, onChange }) => {
               range.surroundContents(span);
               success = true;
             } catch (e) {
-              // Если surroundContents не работает, используем другой метод
               const contents = range.extractContents();
               
-              // Обрабатываем содержимое
               if (contents.nodeType === Node.TEXT_NODE) {
-                // Если это текстовый узел, просто оборачиваем
                 span.textContent = contents.textContent || '';
                 range.insertNode(span);
               } else {
-                // Если это элементы, оборачиваем их
                 span.appendChild(contents);
                 range.insertNode(span);
               }
               
-              // Обновляем выделение
               const newRange = document.createRange();
               newRange.selectNodeContents(span);
               selection?.removeAllRanges();
@@ -393,14 +347,12 @@ const Editor: React.FC<EditorProps> = ({ content, onChange }) => {
               success = true;
             }
           } else {
-            // Нет выделения - применяем цвет к следующему вводу
             const span = document.createElement('span');
             span.style.color = color;
             span.style.setProperty('color', color, 'important');
-            span.innerHTML = '\u200B'; // Zero-width space для сохранения форматирования
+            span.innerHTML = '\u200B';
             range.insertNode(span);
             
-            // Перемещаем курсор после span
             const newRange = document.createRange();
             newRange.setStartAfter(span);
             newRange.collapse(true);
@@ -410,7 +362,6 @@ const Editor: React.FC<EditorProps> = ({ content, onChange }) => {
           }
         } catch (e) {
           console.error('Error applying color with span:', e);
-          // Пробуем через execCommand как запасной вариант
           try {
             document.execCommand('styleWithCSS', false, 'true');
             success = document.execCommand('foreColor', false, color);
@@ -421,10 +372,8 @@ const Editor: React.FC<EditorProps> = ({ content, onChange }) => {
       }
       
       if (success) {
-        // Сохраняем новое выделение
         saveSelection();
         
-        // Обновляем контент и состояние
         requestAnimationFrame(() => {
           updateContent();
           updateState();
@@ -437,7 +386,6 @@ const Editor: React.FC<EditorProps> = ({ content, onChange }) => {
     setColorMenuOpen(false);
   };
 
-  // Закрываем меню цвета при клике вне его
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (colorMenuOpen && !(event.target as Element).closest('.color-picker-wrapper')) {
@@ -449,7 +397,6 @@ const Editor: React.FC<EditorProps> = ({ content, onChange }) => {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [colorMenuOpen]);
 
-  // Инициализация редактора
   useEffect(() => {
     if (editorRef.current && !editorRef.current.innerHTML) {
       editorRef.current.innerHTML = '<p></p>';
@@ -562,7 +509,6 @@ const Editor: React.FC<EditorProps> = ({ content, onChange }) => {
                 type={colorMenuOpen ? 'primary' : 'default'}
                 icon={<FontColorsOutlined />}
                 onClick={() => {
-                  // Сохраняем выделение при открытии меню
                   saveSelection();
                   setColorMenuOpen(!colorMenuOpen);
                 }}
@@ -579,7 +525,6 @@ const Editor: React.FC<EditorProps> = ({ content, onChange }) => {
                         onMouseDown={(e) => {
                           e.preventDefault();
                           e.stopPropagation();
-                          // Сохраняем выделение перед кликом
                           saveSelection();
                         }}
                         onClick={(e) => {

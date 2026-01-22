@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useState, useEffect } from 'react';
 import type { ReactNode } from 'react';
 import { db } from '../db/database';
 
@@ -10,15 +10,7 @@ interface AuthContextType {
   register: (username: string, password: string) => Promise<boolean>;
 }
 
-const AuthContext = createContext<AuthContextType | undefined>(undefined);
-
-export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error('useAuth must be used within AuthProvider');
-  }
-  return context;
-};
+export const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 interface AuthProviderProps {
   children: ReactNode;
@@ -29,7 +21,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const [currentUser, setCurrentUser] = useState<string | null>(null);
 
   useEffect(() => {
-    // Проверяем, есть ли сохраненная сессия
     const savedUser = localStorage.getItem('currentUser');
     if (savedUser) {
       setCurrentUser(savedUser);

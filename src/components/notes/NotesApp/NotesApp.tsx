@@ -1,7 +1,7 @@
 import React from 'react';
 import { Layout } from 'antd';
-import Sidebar from './Sidebar';
-import Workspace from './Workspace';
+import Sidebar from '../Sidebar';
+import Workspace from '../Workspace';
 import './NotesApp.css';
 
 const { Content } = Layout;

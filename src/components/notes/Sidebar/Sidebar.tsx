@@ -1,9 +1,9 @@
 import React from 'react';
 import { Layout, Button, Input, Empty } from 'antd';
 import { PlusOutlined, LogoutOutlined, SearchOutlined } from '@ant-design/icons';
-import { useNotes } from '../../contexts/NotesContext';
-import { useAuth } from '../../contexts/AuthContext';
-import ListItem from './ListItem';
+import { useNotes } from '../../../hooks/useNotes';
+import { useAuth } from '../../../hooks/useAuth';
+import ListItem from '../ListItem';
 import './Sidebar.css';
 
 const { Sider } = Layout;

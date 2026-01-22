@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { useNotes } from '../hooks/useNotes';
-import { Editor } from './editor';
-import { Button, IconButton, Dialog, DialogActions } from './ui';
-import { EditIcon, DeleteIcon } from './icons';
+import { useNotes } from '../../../hooks/useNotes';
+import { Editor } from '../../editor';
+import { Button, IconButton, Dialog, DialogActions } from '../../ui';
+import { EditIcon, DeleteIcon } from '../../icons';
 import './Workspace.css';
 
 const Workspace: React.FC = () => {

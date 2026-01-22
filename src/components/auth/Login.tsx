@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Card, Tabs, Form, Input, Button, message } from 'antd';
 import type { TabsProps } from 'antd';
 import { UserOutlined, LockOutlined } from '@ant-design/icons';
-import { useAuth } from '../../contexts/AuthContext';
+import { useAuth } from '../../hooks/useAuth';
 import './Login.css';
 
 const Login: React.FC = () => {
